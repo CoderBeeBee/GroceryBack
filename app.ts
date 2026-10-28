@@ -6,9 +6,24 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import connectDB from './config/connectDB.ts'
 import disconnectDB from './config/disconnetDB.ts'
+import errorHandler from './middlewares/errorHandler.ts'
+import userRoutes from './routes/userRoutes.ts'
+import { type HydratedDocument } from 'mongoose'
+import {type UserType } from './models/UserModel.ts'
+declare global {
+	namespace Express {
+		interface Request {
+			validatedQuery?: unknown
+			validatedBody?: unknown
+			validatedParams?: unknown
+			user?: HydratedDocument<UserType> | null
+		}
+	}
+}
 
 dotenv.config()
 const app = express()
+const PORT = process.env.PORT || 9000
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -23,7 +38,9 @@ app.use(
 app.use(cookieParser())
 app.use(morgan('common'))
 
-const PORT = process.env.PORT || 9000
+app.use('/api/v1/users', userRoutes)
+
+app.use(errorHandler)
 
 let server: any
 
@@ -53,11 +70,11 @@ process.on('uncaughtException', async (error: Error) => {
 	process.exit(1)
 })
 
-process.on('SIGTERM', async() => {
+process.on('SIGTERM', async () => {
 	console.log(`SIGTERM signal received : closing HTTP server`)
 
 	server.close(async () => {
-        await disconnectDB()
+		await disconnectDB()
 		console.log(`HTTP server closed`)
 		process.exit(0)
 	})

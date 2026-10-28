@@ -1,0 +1,11 @@
+### USER
+POST http://127.0.0.1:8000/api/v1/users/createUser
+Content-Type: application/json
+
+{
+    "email":"jumbo@gmail.com",
+    "password":"test3232",
+    "firstName":"Jumbo",
+    "lastName":"Zwierz"
+
+}
